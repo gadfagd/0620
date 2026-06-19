@@ -1,164 +1,143 @@
-import streamlit as st
-
-st.title('나의 첫 웹')
-st.write('안녕하세요')
 
 import streamlit as st
-import time
+import pandas as pd
+import datetime
 
-# 1. 페이지 기본 설정 (웹 브라우저 탭에 표시되는 내용)
+# 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="꿈을 찾는 MBTI 진로 탐험대",
-    page_icon="🔮",
-    layout="centered"
+    page_title="기말고사 올A 탑승! 공부 계획표",
+    page_icon="📅",
+    layout="wide"
 )
 
-# 2. 화려한 메인 타이틀 및 소개글
-st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🔮 ✨ 꿈을 찾는 MBTI 진로 탐험대 ✨ 🔮</h1>", unsafe_allow_html=True)
-st.markdown("<h3 style='text-align: center; color: #4A90E2;'>나의 MBTI를 선택하고 반짝이는 미래의 직업을 만나보세요! 🚀🌈</h3>", unsafe_allow_html=True)
+# 2. 타이틀 및 응원 메시지
+st.markdown("<h1 style='text-align: center; color: #4A90E2;'>🔥 기말고사 폭풍 성장을 위한 일일 공부 계획표 🔥</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 18px;'>계획 없는 목표는 한낱 꿈에 불과하다! 오늘 하루도 알차게 채워볼까요? 🚀</p>", unsafe_allow_html=True)
 st.write("---")
 
-# 3. 16가지 MBTI 진로 데이터 정의 (이모지 및 응원 문구 가득!)
-mbti_jobs = {
-    "INTJ": {
-        "title": "용의주도한 전략가 🧠",
-        "desc": "독립적이고 전략적인 사고 능력이 뛰어난 당신! 복잡한 문제를 해결하는 것을 즐깁니다. 🧩",
-        "jobs": ["과학 연구원 🔬", "IT 아키텍트 💻", "투자 분석가 📊", "전략 기획자 🎯"],
-        "cheer": "당신의 뛰어난 통찰력은 세상을 더 똑똑하게 바꿀 지도가 될 거예요! 🗺️✨"
-    },
-    "INTP": {
-        "title": "논리적인 사색가 🔍",
-        "desc": "호기심이 많고 분석적인 당신! 늘 새로운 지식과 독창적인 아이디어를 찾아 헤맵니다. 💡",
-        "jobs": ["프로그래머 🖥️", "물리학자 🌌", "게임 개발자 🕹️", "철학자 📚"],
-        "cheer": "끝없는 호기심으로 가득 찬 당신의 두뇌는 미래의 혁신을 이끌 열쇠입니다! 🔑🚀"
-    },
-    "ENTJ": {
-        "title": "대담한 통솔자 👑",
-        "desc": "넘치는 카리스마와 자신감으로 사람들을 이끌고 목표를 향해 전진하는 리더! 📢",
-        "jobs": ["전문 경영인(CEO) 💼", "변호사 ⚖️", "정치인 🏛️", "프로젝트 매니저 📋"],
-        "cheer": "당신의 당당한 발걸음이 향하는 곳이 바로 미래의 중심이 될 것입니다! 🌟🦁"
-    },
-    "ENTP": {
-        "title": "뜨거운 논쟁을 즐기는 변론가 💡",
-        "desc": "새로운 도전을 두려워하지 않고, 고정관념을 깨부수는 아이디어 뱅크! ⚡",
-        "jobs": ["스타트업 창업가 🚀", "마케팅 디렉터 📣", "발명가 🛠️", "영화 감독 🎬"],
-        "cheer": "틀에 갇히지 않는 당신의 불꽃 같은 아이디어가 세상을 뒤흔들 거예요! 🔥✨"
-    },
-    "INFJ": {
-        "title": "선이해를 추구하는 예언자 🌸",
-        "desc": "깊은 통찰력과 강한 인내심을 바탕으로 타인에게 긍정적인 영향을 주는 따뜻한 마음의 소유자 🕊️",
-        "jobs": ["심리 상담사 🤝", "소설가/작가 📝", "교사 🏫", "환경 운동가 🌱"],
-        "cheer": "세상을 더 따뜻하게 만들고 싶어 하는 당신의 예쁜 마음을 응원해요! 💗🌈"
-    },
-    "INFP": {
-        "title": "열정적인 중재자 🎨",
-        "desc": "감수성이 풍부하고 낭만적이며, 자신만의 확고한 가치관을 가진 아름다운 영혼 🦄",
-        "jobs": ["예술가🎨", "웹툰 작가 ✏️", "카운셀러 🫂", "시인 📜"],
-        "cheer": "당신의 마음속에 있는 반짝이는 은하수를 세상에 마음껏 보여주세요! 🌌✨"
-    },
-    "ENFJ": {
-        "title": "정의로운 사회운동가 🌍",
-        "desc": "타인의 성장을 돕고, 선당후사의 정신으로 사회를 이끌어가는 정이 넘치는 리더 🤗",
-        "jobs": ["외교관 🇺🇳", "비영리 단체 대표 🤝", "아나운서 🎤", "진로 상담교사 👩‍🏫"],
-        "cheer": "사람들의 마음을 움직이는 당신의 따뜻한 리더십은 최고의 빛입니다! ☀️👑"
-    },
-    "ENFP": {
-        "title": "재기발랄한 활동가 ✨",
-        "desc": "자유로운 영혼이자 분위기 메이커! 언제나 긍정적이고 에너지가 넘쳐나요 🎈",
-        "jobs": ["크리에이터/유튜버 📹", "이벤트 기획자 🎉", "홍보 전문가 📰", "여행 작가 ✈️"],
-        "cheer": "어디서나 팡팡 터지는 당신의 해피 바이러스로 세상을 밝혀주세요! 🥳🍀"
-    },
-    "ISTJ": {
-        "title": "청렴결백한 논리주의자 📊",
-        "desc": "한 번 시작한 일은 끝까지 책임지는 신뢰의 아이콘! 규칙과 사실을 중요하게 여깁니다 📐",
-        "jobs": ["공무원 🏛️", "회계사 🧮", "데이터 분석가 💻", "군인/경찰 👮"],
-        "cheer": "당신의 묵묵한 성실함과 책임감은 그 어떤 보석보다 단단하고 빛납니다! 💎체"
-    },
-    "ISFJ": {
-        "title": "용감한 수호자 ❤️",
-        "desc": "주변 사람들을 조용하고 세심하게 챙겨주는 천사 같은 마음씨를 가졌어요 😇",
-        "jobs": ["간호사/의사 🏥", "초등 교사 🎒", "사회복지사 🧑‍🤝‍🧑", "사서 📚"],
-        "cheer": "당신이 나누는 따뜻한 온기가 누군가에게는 인생을 바꾸는 큰 힘이 됩니다! 🔥❤️"
-    },
-    "ESTJ": {
-        "title": "엄격한 관리자 👔",
-        "desc": "조직을 체계적으로 관리하고, 현실적이고 실용적인 성과를 만들어내는 능력자 📈",
-        "jobs": ["은행가/금융 감독 💰", "경찰 간부 🚔", "교장 선생님 🏫", "법조인 ⚖️"],
-        "cheer": "당신의 완벽한 실행력과 추진력은 언제나 완벽한 성공을 만들어냅니다! 🏆⚡"
-    },
-    "ESFJ": {
-        "title": "사교적인 외교관 🤝",
-        "desc": "사람들과 만나는 것을 좋아하고, 리액션 요정이자 친절함의 대명사! 🥰",
-        "jobs": ["항공기 승무원 ✈️", "호텔리어 🏨", "홍보 담당자 📣", "유치원 교사 🧸"],
-        "cheer": "주변을 행복하게 만드는 당신의 친화력은 모두에게 선물과 같습니다! 🎁💝"
-    },
-    "ISTP": {
-        "title": "만능 재주꾼 🛠️",
-        "desc": "상황 적응력이 뛰어나고 기계를 다루거나 도구를 쓰는 데 천부적인 재능이 있어요 ⚙️",
-        "jobs": ["엔지니어 🔧", "파일럿 👨‍✈️", "카레이서 🏎️", "스포츠 선수 ⚽"],
-        "cheer": "냉철한 판단력과 뛰어난 손재주로 세상의 모든 벽을 허물어보세요! 🚀💥"
-    },
-    "ISFP": {
-        "title": "호기심 많은 예술가 🎨",
-        "desc": "말없이 따뜻하며, 시각적이고 감각적인 아름다움을 찾아내는 미적 감각의 소유자 🌸",
-        "jobs": ["패션 디자이너 👗", "사진작가 📸", "파티시에 🍰", "작곡가 🎵"],
-        "cheer": "당신만의 독창적인 감각과 색깔로 온 세상을 아름답게 물들여주세요! 🎨🌈"
-    },
-    "ESTP": {
-        "title": "수완 좋은 활동가 🔥",
-        "desc": "에너지가 넘치고 스릴을 즐기며, 당면한 문제를 해결하는 능력이 탁월합니다 ⚡",
-        "jobs": ["기업가/사업가 🏢", "소방관 👨‍🚒", "스포츠 매니저 🏅", "마케터 📊"],
-        "cheer": "망설임 없이 뛰어드는 당신의 용기야말로 세상을 바꿀 원동력입니다! 🌪️🏃‍♂️"
-    },
-    "ESFP": {
-        "title": "자유로운 영혼의 연예인 🎤",
-        "desc": "인생을 축제처럼 즐기는 당신! 호기심도 많고 사람들을 즐겁게 하는 재주꾼 🥳",
-        "jobs": ["배우/연예인 🎬", "뮤지컬 배우 🎭", "행사 MC 🎤", "여행 가이드 🗺️"],
-        "cheer": "당신이 서는 곳이 바로 무대입니다! 당신의 흥과 끼로 세상을 매료시키세요! ✨🌟"
+# 날짜 표시
+today = datetime.date.today()
+st.subheader(f"📅 오늘 날짜: {today.strftime('%Y년 %m월 %d일')}")
+
+# 화면을 두 개의 구역(Column)으로 나누어 배치
+col1, col2 = st.columns([1, 1.2])
+
+# ==========================================
+# 좌측 컬럼 (col1): 오늘 공부 시간 확보하기
+# ==========================================
+with col1:
+    st.markdown("### 🏫 1. 학교 자습 시간 체크 (7교시)")
+    st.caption("자습을 할 수 있는 교시에 체크해 주세요. (1교시당 50분 자습으로 계산됩니다 ⏰)")
+    
+    # 7교시 체크박스 생성
+    school_study_periods = 0
+    periods = ["1교시", "2교시", "3교시", "4교시", "5교시", "6교시", "7교시"]
+    
+    # 2열로 나누어 이쁘게 배치
+    p_cols = st.columns(2)
+    for idx, period in enumerate(periods):
+        with p_cols[idx % 2]:
+            if st.checkbox(f"📖 {period} 자습", key=f"period_{idx}"):
+                school_study_periods += 1
+                
+    # 학교 자습 시간 계산 (분 -> 시간 변환)
+    school_minutes = school_study_periods * 50
+    school_hours = round(school_minutes / 60, 1)
+    
+    st.info(f"💡 **학교 자습 가능 시간:** 총 {school_study_periods}개 교시 ({school_hours}시간)")
+    
+    st.write("---")
+    
+    st.markdown("### 🏃‍♂️ 2. 방과 후 공부 계획")
+    # 공부 장소 선택
+    study_place = st.selectbox(
+        "방과 후에 어디서 공부할 예정인가요? 🎒",
+        ["스터디카페 ✍️", "학원 🏫", "일반 카페 ☕", "집 🏠", "학교 독서실 📚", "기타"]
+    )
+    
+    # 방과 후 공부 시간 선택
+    after_school_hours = st.slider(
+        "방과 후 장소에서 몇 시간 공부할 수 있나요? ⏱️",
+        min_value=0.0, max_value=12.0, value=3.0, step=0.5
+    )
+    
+    st.write("---")
+    
+    # 🔥 총 가용 공부 시간 계산 및 시각화
+    total_available_hours = round(school_hours + after_school_hours, 1)
+    st.markdown("### 📊 오늘 확보한 총 공부 시간")
+    
+    metric_cols = st.columns(3)
+    metric_cols[0].metric(label="🏫 학교 자습", value=f"{school_hours} 시간")
+    metric_cols[1].metric(label="🏃‍♂️ 방과 후", value=f"{after_school_hours} 시간")
+    metric_cols[2].metric(label="🔥 총 목표 시간", value=f"{total_available_hours} 시간", delta="할 수 있다!")
+
+# ==========================================
+# 우측 컬럼 (col2): 실제 공부 기록 및 피드백
+# ==========================================
+with col2:
+    st.markdown("### 📝 3. 과목별 공부 기록 데이터")
+    st.caption("표에 직접 과목을 적고 시간을 입력해 주세요! 행 추가(➕)도 가능합니다.")
+    
+    # 초기 데이터 프레임 구성
+    init_data = {
+        "과목명": ["국어 📚", "수학 📐", "영어 🔤"],
+        "실제 공부한 시간 (시간)": [1.0, 1.5, 1.0],
+        "완벽 마스터까지 필요한 추가 시간 (시간)": [2.0, 1.0, 1.5]
     }
-}
+    df = pd.DataFrame(init_data)
+    
+    # 사용자가 표를 직접 수정할 수 있는 data_editor 활용
+    edited_df = st.data_editor(
+        df, 
+        num_rows="dynamic", 
+        use_container_width=True,
+        key="study_tracker"
+    )
+    
+    # 실제 공부한 총 시간 계산
+    try:
+        actual_total_hours = edited_df["실제 공부한 시간 (시간)"].sum()
+        needed_total_hours = edited_df["완벽 마스터까지 필요한 추가 시간 (시간)"].sum()
+    except Exception:
+        actual_total_hours = 0
+        needed_total_hours = 0
 
-# 4. 사용자 선택 UI (대형 선택 상자)
-st.markdown("### 🔍 나의 MBTI 유형을 골라보세요!")
-selected_mbti = st.selectbox(
-    "아래 목록에서 선택해주세요 👇", 
-    list(mbti_jobs.keys()),
-    index=0
-)
+    st.success(f"✅ 현재까지 **총 {actual_total_hours:.1f}시간** 공부 완료! (앞으로 총 {needed_total_hours:.1f}시간 더 필요해요 🎯)")
+    
+    st.write("---")
+    
+    st.markdown("###🌟 4. 하루 마무리 피드백")
+    
+    # 오늘의 만족도 슬라이더 (이모지 활용)
+    satisfaction = st.select_slider(
+        "오늘 나의 공부 만족도는? 🤔",
+        options=["✨ 최악이야 (반성하자)", "📉 조금 아쉬워", "😐 평범했어", "👍 만족스러워!", "👑 오늘 나 자신을 이겼다! "],
+        value="😐 평범했어"
+    )
+    
+    # 오늘 부족했던 점이나 내일의 다짐 기록
+    feedback_text = st.text_area(
+        "오늘 어떤 점이 부족했나요? 내일은 어떻게 보완할지 적어보세요 ✍️",
+        placeholder="예시: 수학 오답노트 정리할 때 집중력이 흐려졌다. 내일은 스터디카페에 가면 수학을 가장 먼저 끝내야지!"
+    )
+    
+    # 하루 저장 버튼
+    if st.button("🎉 오늘의 공부 마스터! 플래너 저장하기 🎉", use_container_width=True):
+        st.balloons() # 축하 풍선 이펙트
+        st.markdown("### 🏆 오늘의 최종 리포트")
+        
+        # 성적표 느낌의 요약 정보 출력
+        report_card = f"""
+        * **날짜:** {today.strftime('%Y-%m-%d')}
+        * **오늘 목표했던 시간:** {total_available_hours}시간 / **실제 공부한 시간:** {actual_total_hours:.1f}시간
+        * **방과 후 열공 장소:** {study_place}
+        * **오늘의 스스로 평가:** {satisfaction}
+        * **피드백 및 다짐:** > {feedback_text if feedback_text else '오늘도 수고한 나에게 박수를! 👏'}
+        """
+        st.markdown(report_card)
+        st.toast("오늘 하루도 정말 수고 많았어요! 기말고사 대박 나자! 💪", icon="🏅")
 
-st.write("") # 간격 띄우기
-
-# 5. 결과 확인 버튼 및 화려한 애니메이션 효과
-if st.button("🚀 내 미래 직업 탐험하기 🚀", use_container_width=True):
-    # 감성적인 로딩바 연출
-    with st.spinner('🔮 당신의 성향을 분석하여 반짝이는 미래를 그리는 중... 잠시만 기다려주세요!'):
-        time.sleep(1.5) # 1.5초 대기 효과
-    
-    # 🎉 화려한 축하 풍선 이펙트!
-    st.balloons()
-    
-    # 데이터 매핑
-    result = mbti_jobs[selected_mbti]
-    
-    # 화려한 결과 박스 레이아웃
-    st.success(f"## 🎉 당신은 {selected_mbti} : {result['title']}")
-    
-    # 성향 설명
-    st.markdown(f"### 💡 **성향 알아보기**")
-    st.info(result['desc'])
-    
-    # 추천 직업 리스트 카드로 배치
-    st.markdown("### 🛠️ **추천하는 미래 직업**")
-    cols = st.columns(2)
-    for idx, job in enumerate(result['jobs']):
-        with cols[idx % 2]:
-            st.markdown(f"<div style='background-color: #f0f2f6; padding: 15px; border-radius: 10px; text-align: center; margin: 5px; font-weight: bold; font-size: 18px;'>{job}</div>", unsafe_allow_html=True)
-            
-    st.write("")
-    # 응원 한마디
-    st.markdown("### 🍀 **진로 멘토의 응원 한마디!**")
-    st.markdown(f"<h4 style='color: #FF4B4B; text-align: center; font-style: italic;'>\"{result['cheer']}\"</h4>", unsafe_allow_html=True)
-
-# 6. 하단 푸터 생성
+# 4. 하단 푸터
 st.write("---")
-st.markdown("<p style='text-align: center; color: gray;'>🌟 본 프로그램은 학생들의 행복한 미래와 진로 선택을 응원합니다. 🌟</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray;'>Designed for Final Exam Success 🎯 | 스트림릿 공부 플래너</p>", unsafe_allow_html=True)
